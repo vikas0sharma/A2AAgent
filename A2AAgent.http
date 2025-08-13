@@ -1,0 +1,6 @@
+@A2AAgent_HostAddress = http://localhost:5082
+
+GET {{A2AAgent_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
