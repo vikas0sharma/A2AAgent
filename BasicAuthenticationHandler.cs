@@ -8,13 +8,17 @@ namespace A2AAgent
 
     public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
-
+        private readonly string _user;
+        private readonly string _password;
         public BasicAuthenticationHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
             ILoggerFactory logger,
-            UrlEncoder encoder)
+            UrlEncoder encoder,
+            IConfiguration configuration)
             : base(options, logger, encoder)
         {
+            _user = configuration["Authentication:Basic:UserName"]!;
+            _password = configuration["Authentication:Basic:Password"]!;
         }
 
         protected override Task HandleChallengeAsync(AuthenticationProperties properties)
@@ -60,7 +64,7 @@ namespace A2AAgent
             var username = decoded[..sepIndex];
             var password = decoded[(sepIndex + 1)..];
 
-            var configured = new { Username = "user", Password = "password" };
+            var configured = new { Username = _user, Password = _password };
             if (string.IsNullOrEmpty(configured.Username) || string.IsNullOrEmpty(configured.Password))
             {
                 return Task.FromResult(AuthenticateResult.Fail("Basic authentication not configured."));

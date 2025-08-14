@@ -1,5 +1,6 @@
 ﻿using A2A.Server.Infrastructure;
 using A2A.Server.Infrastructure.Services;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace A2AAgent
@@ -11,7 +12,7 @@ namespace A2AAgent
             throw new NotImplementedException();
         }
 
-        async IAsyncEnumerable<AgentResponseContent> IAgentRuntime.ExecuteAsync(TaskRecord task, CancellationToken cancellationToken)
+        async IAsyncEnumerable<AgentResponseContent> IAgentRuntime.ExecuteAsync(TaskRecord task, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             await Task.Delay(1, cancellationToken);
             //yield return new ArtifactResponseContent(new A2A.Models.Artifact

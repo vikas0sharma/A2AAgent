@@ -1,13 +1,9 @@
-using A2A;
+using A2A.Models;
 using A2A.Server;
 using A2A.Server.AspNetCore;
 using A2A.Server.Infrastructure;
 using A2A.Server.Infrastructure.Services;
 using A2AAgent;
-using AspNetCore.Authentication.Basic;
-using Microsoft.AspNetCore.Authentication;
-using System.Net.Mime;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,10 +14,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add Basic authentication
-builder.Services
-    .AddAuthentication("Basic")
-    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("Basic", options => { });
+//Configure Authentication
+(SecurityScheme scheme, string schemeName) = builder.Services.ConfigureAuthentication(builder.Configuration);
 
 // Add authorization (simple: any authenticated user can access A2A)
 builder.Services.AddAuthorizationBuilder().AddPolicy("A2A", policy => policy.RequireAuthenticatedUser());
@@ -42,12 +36,7 @@ builder.Services.AddA2AWellKnownAgent((provider, builder) =>
             .WithId("get_current_weather_info")
             .WithName("CurrentWeatherInfo")
             .WithDescription("Gets the current weather information"))
-        .WithSecurityScheme(SecuritySchemeType.Http,
-            new GenericSecuritySchemeBuilder()
-            .UseHttp()
-            .WithScheme("basic")
-            .Build())
-        .WithSecurityRequirement("basic", ["read"]);
+        .WithSecurityScheme(schemeName!, scheme!);
 });
 
 builder.Services.AddDistributedMemoryCache();
@@ -82,7 +71,6 @@ var a2aGroup = app.MapGroup("/a2a")
     .RequireAuthorization("A2A");
 
 a2aGroup.MapA2AHttpEndpoint("");
-
 
 app.MapControllers();
 
