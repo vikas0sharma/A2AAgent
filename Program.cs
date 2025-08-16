@@ -17,7 +17,7 @@ builder.Services.AddSwaggerGen();
 //Configure Authentication
 (SecurityScheme scheme, string schemeName) = builder.Services.ConfigureAuthentication(builder.Configuration);
 
-// Add authorization (simple: any authenticated user can access A2A)
+// Add authorization
 builder.Services.AddAuthorizationBuilder().AddPolicy("A2A", policy => policy.RequireAuthenticatedUser());
 
 builder.Services.AddA2AWellKnownAgent((provider, builder) =>
@@ -48,6 +48,9 @@ builder.Services.AddA2AProtocolServer(builder =>
         .UseDistributedCacheTaskRepository()
         .SupportsStreaming();
 });
+
+builder.Services.ConfigureNewsApi(builder.Configuration);
+builder.Services.ConfigureSemanticKernel(builder.Configuration);
 
 
 var app = builder.Build();

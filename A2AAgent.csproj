@@ -4,19 +4,20 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>c69be2a0-9c5c-4a56-a5bd-39697374a945</UserSecretsId>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="AspNetCore.Authentication.Basic" Version="8.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.19" />
+		<PackageReference Include="Microsoft.SemanticKernel" Version="1.62.0" />
+		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Google" Version="1.62.0-alpha" />
+		<PackageReference Include="Microsoft.SemanticKernel.Connectors.HuggingFace" Version="1.62.0-preview" />
+		<PackageReference Include="RestEase" Version="1.6.4" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 		<PackageReference Include="a2a-net.Server" Version="0.10.0" />
 		<PackageReference Include="a2a-net.Server.AspNetCore" Version="0.10.0" />
 		<PackageReference Include="a2a-net.Server.Infrastructure.DistributedCache" Version="0.10.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="Controllers\" />
 	</ItemGroup>
 
 </Project>

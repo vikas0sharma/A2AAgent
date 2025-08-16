@@ -1,13 +1,43 @@
 ﻿using A2A;
 using A2A.Models;
 using A2A.Server.Infrastructure.Services;
+using A2AAgent.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.SemanticKernel;
+using RestEase;
 
 namespace A2AAgent
 {
     public static class AuthenticationExtensions
     {
+        public static IServiceCollection ConfigureSemanticKernel(this IServiceCollection services, IConfiguration configuration)
+        {
+            //services.AddHuggingFaceChatCompletion(configuration["HuggingFace:ModelName"]!, new Uri(configuration["HuggingFace:BaseUrl"]!), configuration["HuggingFace:ApiKey"]!);
+            services.AddGoogleAIGeminiChatCompletion(configuration["Google:ModelName"]!, apiKey: configuration["Google:ApiKey"]!);
+            services.AddScoped<NewsPlugin>();
+            services.AddScoped(s =>
+            {
+                var kernel = new Kernel(s);
+                kernel.Plugins.AddFromObject(s.GetRequiredService<NewsPlugin>());
+                return kernel;
+            });
+
+            return services;
+        }
+
+        public static IServiceCollection ConfigureNewsApi(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddScoped(_ =>
+            {
+                INewsApi api = RestClient.For<INewsApi>(configuration["NewsApi:BaseUrl"]);
+                api.ApiKey = configuration["NewsApi:ApiKey"]!;
+                return api;
+            });
+
+            return services;
+        }
+
         public static (SecurityScheme scheme, string schemeName) ConfigureAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
             var authType = configuration["Authentication:Type"]!;
