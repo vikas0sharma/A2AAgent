@@ -11,6 +11,7 @@
 		<PackageReference Include="AspNetCore.Authentication.Basic" Version="8.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.19" />
 		<PackageReference Include="Microsoft.SemanticKernel" Version="1.62.0" />
+		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Ollama" Version="1.62.0-alpha" />
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Google" Version="1.62.0-alpha" />
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.HuggingFace" Version="1.62.0-preview" />
 		<PackageReference Include="RestEase" Version="1.6.4" />

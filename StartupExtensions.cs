@@ -9,10 +9,11 @@ using RestEase;
 
 namespace A2AAgent
 {
-    public static class AuthenticationExtensions
+    public static class StartupExtensions
     {
         public static IServiceCollection ConfigureSemanticKernel(this IServiceCollection services, IConfiguration configuration)
         {
+            //services.AddOllamaChatCompletion("gpt-oss:20b", new Uri("http://127.0.0.1:11434"));
             //services.AddHuggingFaceChatCompletion(configuration["HuggingFace:ModelName"]!, new Uri(configuration["HuggingFace:BaseUrl"]!), configuration["HuggingFace:ApiKey"]!);
             services.AddGoogleAIGeminiChatCompletion(configuration["Google:ModelName"]!, apiKey: configuration["Google:ApiKey"]!);
             services.AddScoped<NewsPlugin>();

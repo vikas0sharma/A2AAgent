@@ -25,7 +25,7 @@ builder.Services.AddA2AWellKnownAgent((provider, builder) =>
 
     builder
         .WithName("A2A Agent")
-        .WithDescription("Gets the current weather")
+        .WithDescription("Gets the current worldwide news")
         .WithVersion("1.0.0.0")
         .WithProvider(provider => provider
             .WithOrganization("Vikas Sharma")
@@ -33,9 +33,9 @@ builder.Services.AddA2AWellKnownAgent((provider, builder) =>
         .SupportsStreaming()
         .WithUrl(new("/a2a", UriKind.Relative))
         .WithSkill(skill => skill
-            .WithId("get_current_weather_info")
-            .WithName("CurrentWeatherInfo")
-            .WithDescription("Gets the current weather information"))
+            .WithId("get_top_headlines")
+            .WithName("get_top_headlines")
+            .WithDescription("Gets live top and breaking headlines for a country, specific category in a country"))
         .WithSecurityScheme(schemeName!, scheme!);
 });
 

@@ -1,10 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.Google;
-using Microsoft.SemanticKernel.Connectors.HuggingFace;
-using System.Threading.Tasks;
 
 namespace A2AAgent.Controllers
 {
@@ -22,6 +19,10 @@ namespace A2AAgent.Controllers
                 FunctionChoiceBehavior = FunctionChoiceBehavior.Required(),
                 ToolCallBehavior = GeminiToolCallBehavior.AutoInvokeKernelFunctions
             };
+            //OllamaPromptExecutionSettings settings = new()
+            //{
+            //    FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
+            //};
             try
             {
                 var response = await _chatService.GetChatMessageContentAsync(message, settings, _kernel);
