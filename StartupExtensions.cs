@@ -1,5 +1,7 @@
 ﻿using A2A;
 using A2A.Models;
+using A2A.Server;
+using A2A.Server.Infrastructure;
 using A2A.Server.Infrastructure.Services;
 using A2AAgent.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -11,6 +13,46 @@ namespace A2AAgent
 {
     public static class StartupExtensions
     {
+
+        public static IServiceCollection ConfigureA2AServerWithAuth(this IServiceCollection services, IConfiguration configuration)
+        {
+            //Configure Authentication
+            (SecurityScheme scheme, string schemeName) = ConfigureAuthentication(services, configuration);
+
+            services.AddAuthorizationBuilder().AddPolicy("A2A", policy => policy.RequireAuthenticatedUser());
+
+            services.AddA2AWellKnownAgent((provider, builder) =>
+            {
+
+                builder
+                    .WithName("A2A Agent")
+                    .WithDescription("Gets the current worldwide news")
+                    .WithVersion("1.0.0.0")
+                    .WithProvider(provider => provider
+                        .WithOrganization("Vikas Sharma")
+                        .WithUrl(new("https://github.com/vikas0sharma")))
+                    .SupportsStreaming()
+                    .WithUrl(new("/a2a", UriKind.Relative))
+                    .WithSkill(skill => skill
+                        .WithId("get_top_headlines")
+                        .WithName("get_top_headlines")
+                        .WithDescription("Gets live top and breaking headlines for a country, specific category in a country"))
+                    .WithSecurityScheme(schemeName!, scheme!);
+            });
+
+            services.AddDistributedMemoryCache();
+            services.AddSingleton<IAgentRuntime, AgentRuntime>();
+            services.AddA2AProtocolServer(builder =>
+            {
+                builder
+                    .UseAgentRuntime(provider => provider.GetRequiredService<IAgentRuntime>())
+                    .UseDistributedCacheTaskRepository()
+                    .SupportsStreaming();
+            });
+
+            return services;
+        }
+
         public static IServiceCollection ConfigureSemanticKernel(this IServiceCollection services, IConfiguration configuration)
         {
             //services.AddOllamaChatCompletion("gpt-oss:20b", new Uri("http://127.0.0.1:11434"));
@@ -39,7 +81,7 @@ namespace A2AAgent
             return services;
         }
 
-        public static (SecurityScheme scheme, string schemeName) ConfigureAuthentication(this IServiceCollection services, IConfiguration configuration)
+        private static (SecurityScheme scheme, string schemeName) ConfigureAuthentication(IServiceCollection services, IConfiguration configuration)
         {
             var authType = configuration["Authentication:Type"]!;
             GenericSecuritySchemeBuilder securitySchemeBuilder = new();
