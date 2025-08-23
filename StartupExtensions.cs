@@ -58,8 +58,8 @@ namespace A2AAgent
             //services.AddOllamaChatCompletion("gpt-oss:20b", new Uri("http://127.0.0.1:11434"));
             //services.AddHuggingFaceChatCompletion(configuration["HuggingFace:ModelName"]!, new Uri(configuration["HuggingFace:BaseUrl"]!), configuration["HuggingFace:ApiKey"]!);
             services.AddGoogleAIGeminiChatCompletion(configuration["Google:ModelName"]!, apiKey: configuration["Google:ApiKey"]!);
-            services.AddScoped<NewsPlugin>();
-            services.AddScoped(s =>
+            services.AddSingleton<NewsPlugin>();
+            services.AddSingleton(s =>
             {
                 var kernel = new Kernel(s);
                 kernel.Plugins.AddFromObject(s.GetRequiredService<NewsPlugin>());
@@ -71,7 +71,7 @@ namespace A2AAgent
 
         public static IServiceCollection ConfigureNewsApi(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddScoped(_ =>
+            services.AddSingleton(_ =>
             {
                 INewsApi api = RestClient.For<INewsApi>(configuration["NewsApi:BaseUrl"]);
                 api.ApiKey = configuration["NewsApi:ApiKey"]!;
