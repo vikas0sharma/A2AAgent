@@ -57,7 +57,9 @@ namespace A2AAgent
         {
             //services.AddOllamaChatCompletion("gpt-oss:20b", new Uri("http://127.0.0.1:11434"));
             //services.AddHuggingFaceChatCompletion(configuration["HuggingFace:ModelName"]!, new Uri(configuration["HuggingFace:BaseUrl"]!), configuration["HuggingFace:ApiKey"]!);
-            services.AddGoogleAIGeminiChatCompletion(configuration["Google:ModelName"]!, apiKey: configuration["Google:ApiKey"]!);
+            string apiKey = string.IsNullOrEmpty(configuration["Google:ApiKey"]) ? Environment.GetEnvironmentVariable("GOOGLE_APIKEY"): configuration["Google:ApiKey"];
+            Console.WriteLine("ApiKey Found: " + !string.IsNullOrEmpty(apiKey));
+            services.AddGoogleAIGeminiChatCompletion(configuration["Google:ModelName"]!, apiKey: apiKey!);
             services.AddSingleton<NewsPlugin>();
             services.AddSingleton(s =>
             {
@@ -74,7 +76,7 @@ namespace A2AAgent
             services.AddSingleton(_ =>
             {
                 INewsApi api = RestClient.For<INewsApi>(configuration["NewsApi:BaseUrl"]);
-                api.ApiKey = configuration["NewsApi:ApiKey"]!;
+                api.ApiKey = string.IsNullOrEmpty(configuration["NewsApi:ApiKey"]) ? Environment.GetEnvironmentVariable("NEWSAPI_APIKEY") : configuration["NewsApi:ApiKey"];
                 return api;
             });
 

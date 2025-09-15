@@ -85,6 +85,7 @@ namespace A2AAgent
                     // Add user message to chat history
                     chatHistory.AddUserMessage(userMessage);
 
+                    _logger.LogInformation($"User: {userMessage}");
                     // Configure execution settings for Gemini
                     var settings = new GeminiPromptExecutionSettings
                     {
