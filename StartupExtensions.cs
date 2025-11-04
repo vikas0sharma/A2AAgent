@@ -8,10 +8,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.SemanticKernel;
 using RestEase;
-using System.ComponentModel;
-using System.Runtime.Serialization;
-using System.Text.Json.Serialization;
-using YamlDotNet.Serialization;
 
 namespace A2AAgent
 {
@@ -25,50 +21,24 @@ namespace A2AAgent
 
             services.AddAuthorizationBuilder().AddPolicy("A2A", policy => policy.RequireAuthenticatedUser());
 
-            IAgentCardBuilder builder = new AgentCardBuilder()
-                .WithName("A2A Agent")
-                .WithDescription("Gets the current worldwide news")
-                .WithVersion("1.0.0.0")
-                .WithProvider(provider => provider
-                    .WithOrganization("Vikas Sharma")
-                    .WithUrl(new("https://github.com/vikas0sharma")))
+            services.AddA2AWellKnownAgent((provider, builder) =>
+            {
+
+                builder
+                    .WithName("A2A Agent")
+                    .WithDescription("Gets the current worldwide news")
+                    .WithVersion("1.0.0.0")
+                    .WithProvider(provider => provider
+                        .WithOrganization("Vikas Sharma")
+                        .WithUrl(new("https://github.com/vikas0sharma")))
                     .SupportsStreaming()
                     .WithUrl(new("/a2a", UriKind.Relative))
-                .WithSkill(skill => skill
+                    .WithSkill(skill => skill
                         .WithId("get_top_headlines")
                         .WithName("get_top_headlines")
                         .WithDescription("Gets live top and breaking headlines for a country, specific category in a country"))
-                .WithSecurityScheme(schemeName!, scheme!);
-
-            var agentCard = builder.Build();
-
-            var agentCard2 = new AgentCardExtended(agentCard)
-            {
-                ProtocolVersion = "0.3.0",
-                PreferredTransport = "JSONRPC"
-            };
-            services.AddSingleton(agentCard2);
-
-            //services.AddA2AWellKnownAgent((provider, builder) =>
-            //{
-
-            //    builder
-            //        .WithName("A2A Agent")
-            //        .WithDescription("Gets the current worldwide news")
-            //        .WithVersion("1.0.0.0")
-            //        .WithProvider(provider => provider
-            //            .WithOrganization("Vikas Sharma")
-            //            .WithUrl(new("https://github.com/vikas0sharma")))
-            //        .SupportsStreaming()
-            //        .WithUrl(new("/a2a", UriKind.Relative))
-            //        .WithSkill(skill => skill
-            //            .WithId("get_top_headlines")
-            //            .WithName("get_top_headlines")
-            //            .WithDescription("Gets live top and breaking headlines for a country, specific category in a country"))
-            //        .WithSecurityScheme(schemeName!, scheme!);
-
-            //    var x = builder.Build();
-            //});
+                    .WithSecurityScheme(schemeName!, scheme!);
+            });
 
             services.AddDistributedMemoryCache();
             services.AddSingleton<IAgentRuntime, AgentRuntime>();
@@ -87,7 +57,7 @@ namespace A2AAgent
         {
             //services.AddOllamaChatCompletion("gpt-oss:20b", new Uri("http://127.0.0.1:11434"));
             //services.AddHuggingFaceChatCompletion(configuration["HuggingFace:ModelName"]!, new Uri(configuration["HuggingFace:BaseUrl"]!), configuration["HuggingFace:ApiKey"]!);
-            string apiKey = string.IsNullOrEmpty(configuration["Google:ApiKey"]) ? Environment.GetEnvironmentVariable("GOOGLE_APIKEY") : configuration["Google:ApiKey"];
+            string apiKey = string.IsNullOrEmpty(configuration["Google:ApiKey"]) ? Environment.GetEnvironmentVariable("GOOGLE_APIKEY"): configuration["Google:ApiKey"];
             Console.WriteLine("ApiKey Found: " + !string.IsNullOrEmpty(apiKey));
             services.AddGoogleAIGeminiChatCompletion(configuration["Google:ModelName"]!, apiKey: apiKey!);
             services.AddSingleton<NewsPlugin>();
@@ -194,36 +164,4 @@ namespace A2AAgent
             return (scheme, schemeName);
         }
     }
-
-    public record AgentCardExtended : AgentCard
-    {
-
-        public AgentCardExtended(AgentCard card)
-        {
-            this.Version = card.Version;
-            this.Name = card.Name;
-            this.Description = card.Description;
-            this.Provider = card.Provider;
-            this.Url = card.Url;
-            this.Skills = card.Skills;
-            this.SecuritySchemes = card.SecuritySchemes;
-            this.Capabilities = card.Capabilities;
-            this.DefaultInputModes = card.DefaultInputModes;
-            this.DefaultOutputModes = card.DefaultOutputModes;
-            this.IconUrl = card.IconUrl;
-            this.DocumentationUrl = card.DocumentationUrl;
-            this.Security = card.Security;
-            this.SupportsAuthenticatedExtendedCard = card.SupportsAuthenticatedExtendedCard;
-
-        }
-
-        [Description("Protocol Version.")]
-        [DataMember(Name = "protocolVersion", Order = 15), JsonPropertyName("protocolVersion"), JsonPropertyOrder(15), YamlMember(Alias = "protocolVersion", Order = 15)]
-        public string ProtocolVersion { get; set; } = "0.3.0";
-
-        [Description("Protocol Transport.")]
-        [DataMember(Name = "preferredTransport", Order = 16), JsonPropertyName("preferredTransport"), JsonPropertyOrder(16), YamlMember(Alias = "preferredTransport", Order = 16)]
-        public string PreferredTransport { get; set; } = "JSONRPC";
-    }
-
 }
