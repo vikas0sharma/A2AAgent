@@ -10,15 +10,14 @@
 	<ItemGroup>
 		<PackageReference Include="AspNetCore.Authentication.Basic" Version="8.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.19" />
-		<PackageReference Include="Microsoft.SemanticKernel" Version="1.62.0" />
-		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Ollama" Version="1.62.0-alpha" />
-		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Google" Version="1.62.0-alpha" />
-		<PackageReference Include="Microsoft.SemanticKernel.Connectors.HuggingFace" Version="1.62.0-preview" />
 		<PackageReference Include="RestEase" Version="1.6.4" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
-		<PackageReference Include="a2a-net.Server" Version="0.10.0" />
-		<PackageReference Include="a2a-net.Server.AspNetCore" Version="0.10.0" />
-		<PackageReference Include="a2a-net.Server.Infrastructure.DistributedCache" Version="0.10.0" />
+
+		<PackageReference Include="OllamaSharp" Version="5.4.12" />
+		<PackageReference Include="Microsoft.Agents.AI.Abstractions" Version="1.0.0-preview.251204.1" />
+		<PackageReference Include="Microsoft.Agents.AI.A2A" Version="1.0.0-preview.251204.1" />
+		<PackageReference Include="Microsoft.Agents.AI.Hosting.A2A.AspNetCore" Version="1.0.0-preview.251204.1" />
+		<PackageReference Include="Microsoft.Agents.AI" Version="1.0.0-preview.251204.1" />
 	</ItemGroup>
 
 </Project>

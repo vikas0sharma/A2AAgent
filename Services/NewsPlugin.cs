@@ -1,4 +1,4 @@
-﻿using Microsoft.SemanticKernel;
+﻿using Microsoft.Extensions.AI;
 using RestEase;
 using System.ComponentModel;
 
@@ -6,7 +6,6 @@ namespace A2AAgent.Services
 {
     public class NewsPlugin(INewsApi _api, ILogger<NewsPlugin> _logger)
     {
-        [KernelFunction("get_top_headlines")]
         [Description("Gets live top and breaking headlines for a country, specific category in a country")]
         public async Task<TopHeadlinesResponseDto> GetTopHeadlinesAsync(
             [Description("The 2-letter ISO 3166-1 code of the country you want to get headlines for")] string country = "us",
@@ -26,6 +25,11 @@ namespace A2AAgent.Services
                 _logger.LogError($"API call failed: {e.Content}|{e.Message}");
                 return null;
             }
+        }
+
+        public IEnumerable<AIFunction> AsAITools()
+        {
+            yield return AIFunctionFactory.Create(this.GetTopHeadlinesAsync);
         }
     }
 }
