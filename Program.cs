@@ -71,7 +71,7 @@ var a2aTaskManager = a2aGroup.MapA2A(
              Name = "get_top_headlines",
              Description = "Gets live top and breaking headlines for a country, specific category in a country"
          } ],
-        Url = "http://localhost:5082/a2a",
+        Url = $"{app.Configuration["A2AUrl"]}a2a",
         SecuritySchemes = new Dictionary<string, A2A.SecurityScheme> { { security.Key, security.Value } }
     },
     taskManager => app.MapWellKnownAgentCard(taskManager, "/"));
