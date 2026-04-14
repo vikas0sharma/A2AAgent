@@ -14,10 +14,10 @@
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 
 		<PackageReference Include="OllamaSharp" Version="5.4.12" />
-		<PackageReference Include="Microsoft.Agents.AI.Abstractions" Version="1.0.0-preview.251204.1" />
-		<PackageReference Include="Microsoft.Agents.AI.A2A" Version="1.0.0-preview.251204.1" />
-		<PackageReference Include="Microsoft.Agents.AI.Hosting.A2A.AspNetCore" Version="1.0.0-preview.251204.1" />
-		<PackageReference Include="Microsoft.Agents.AI" Version="1.0.0-preview.251204.1" />
+		<PackageReference Include="Microsoft.Agents.AI" Version="1.0.0" />
+		<PackageReference Include="Microsoft.Agents.AI.Abstractions" Version="1.0.0" />
+		<PackageReference Include="A2A" Version="1.0.0-preview" />
+		<PackageReference Include="A2A.AspNetCore" Version="1.0.0-preview" />
 	</ItemGroup>
 
 </Project>

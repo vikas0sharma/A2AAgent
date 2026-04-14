@@ -24,8 +24,8 @@ namespace A2AAgent
         public static KeyValuePair<string, SecurityScheme> ConfigureAuthentication(IServiceCollection services, IConfiguration configuration)
         {
             var authType = configuration["Authentication:Type"]!;
-            SecurityScheme scheme = null;
-            string schemeName = null;
+            SecurityScheme scheme = null!;
+            string schemeName = null!;
 
             switch (authType)
             {
@@ -36,7 +36,10 @@ namespace A2AAgent
                         .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("Basic", options => { });
 
                     schemeName = "http";
-                    scheme = new HttpAuthSecurityScheme("Basic");
+                    scheme = new SecurityScheme
+                    {
+                        HttpAuthSecurityScheme = new HttpAuthSecurityScheme { Scheme = "Basic" }
+                    };
 
                     break;
                 case "ApiKey":
@@ -45,7 +48,14 @@ namespace A2AAgent
                         .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>("ApiKey", options => { });
 
                     schemeName = "apiKey";
-                    scheme = new ApiKeySecurityScheme(configuration["Authentication:ApiKey:HeaderName"]!, "header");
+                    scheme = new SecurityScheme
+                    {
+                        ApiKeySecurityScheme = new ApiKeySecurityScheme
+                        {
+                            Name = configuration["Authentication:ApiKey:HeaderName"]!,
+                            Location = "header"
+                        }
+                    };
 
                     break;
                 case "OAuth2":
@@ -62,10 +72,20 @@ namespace A2AAgent
                         });
 
                     schemeName = "oauth2";
-                    scheme = new OAuth2SecurityScheme(new OAuthFlows
+                    scheme = new SecurityScheme
                     {
-                        ClientCredentials = new ClientCredentialsOAuthFlow(new Uri(configuration["Authentication:OAuth2:TokenEndpoint"]!), new Dictionary<string, string>()) { }
-                    });
+                        OAuth2SecurityScheme = new OAuth2SecurityScheme
+                        {
+                            Flows = new OAuthFlows
+                            {
+                                ClientCredentials = new ClientCredentialsOAuthFlow
+                                {
+                                    TokenUrl = configuration["Authentication:OAuth2:TokenEndpoint"]!,
+                                    Scopes = new Dictionary<string, string>()
+                                }
+                            }
+                        }
+                    };
 
                     break;
                 case "OpenIdConnect":
@@ -83,7 +103,13 @@ namespace A2AAgent
 
 
                     schemeName = "openIdConnect";
-                    scheme = new OpenIdConnectSecurityScheme(new Uri(configuration["Authentication:OpenIdConnect:OpenIdConnectUrl"]!));
+                    scheme = new SecurityScheme
+                    {
+                        OpenIdConnectSecurityScheme = new OpenIdConnectSecurityScheme
+                        {
+                            OpenIdConnectUrl = configuration["Authentication:OpenIdConnect:OpenIdConnectUrl"]!
+                        }
+                    };
                     break;
                 default:
                     throw new InvalidOperationException($"Unsupported authentication type: {authType}");

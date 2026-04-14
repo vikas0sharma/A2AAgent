@@ -1,7 +1,7 @@
+using A2A;
 using A2A.AspNetCore;
 using A2AAgent;
 using A2AAgent.Services;
-using Microsoft.Extensions.AI;
 using OllamaSharp;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,25 +19,57 @@ builder.Services.ConfigureNewsApiService(builder.Configuration);
 var security = StartupExtensions.ConfigureAuthentication(builder.Services, builder.Configuration);
 builder.Services.AddAuthorizationBuilder().AddPolicy("A2A", policy => policy.RequireAuthenticatedUser());
 
-var app = builder.Build();
-
-HttpClient httpClient = new()
+// Register OllamaApiClient for DI
+builder.Services.AddSingleton<OllamaApiClient>(sp =>
 {
-    BaseAddress = new Uri(builder.Configuration["Ollama:BaseUrl"]!)
-};
-httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + Environment.GetEnvironmentVariable("OLLAMA_APIKEY") ?? builder.Configuration["Ollama:ApiKey"]);
-
-using OllamaApiClient chatClient = new(httpClient, builder.Configuration["Ollama:ModelName"]!);
-
-Microsoft.Agents.AI.ChatClientAgent agent = chatClient.CreateAIAgent(options: new Microsoft.Agents.AI.ChatClientAgentOptions
-{
-    Name = "NewsAgent",
-    Description = "Gets the current worldwide news",
-    ChatOptions = new ChatOptions
+    HttpClient httpClient = new()
     {
-        Tools = [.. app.Services.GetService<NewsPlugin>()!.AsAITools()],
-    }
+        BaseAddress = new Uri(builder.Configuration["Ollama:BaseUrl"]!)
+    };
+    httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + (Environment.GetEnvironmentVariable("OLLAMA_APIKEY") ?? builder.Configuration["Ollama:ApiKey"]));
+    return new OllamaApiClient(httpClient, builder.Configuration["Ollama:ModelName"]!);
 });
+
+var a2aUrl = builder.Configuration["A2AUrl"] ?? "https://localhost:5001/";
+
+// Register A2A agent with the new v1.0 pattern
+builder.Services.AddA2AAgent<NewsAgentHandler>(
+    new AgentCard
+    {
+        Name = "NewsAgent",
+        Description = "Gets the current worldwide news",
+        Version = "1.0.0",
+        SupportedInterfaces =
+        [
+            new AgentInterface
+            {
+                Url = $"{a2aUrl}a2a",
+                ProtocolBinding = "JSONRPC",
+                ProtocolVersion = "1.0",
+            }
+        ],
+        Capabilities = new AgentCapabilities
+        {
+            Streaming = false,
+            PushNotifications = false,
+        },
+        DefaultInputModes = ["text/plain"],
+        DefaultOutputModes = ["text/plain"],
+        Provider = new AgentProvider { Organization = "Vikas Sharma", Url = "https://github.com/vikas0sharma" },
+        Skills =
+        [
+            new AgentSkill
+            {
+                Id = "get_top_headlines",
+                Name = "get_top_headlines",
+                Description = "Gets live top and breaking headlines for a country, specific category in a country",
+                Tags = ["news", "headlines"],
+            }
+        ],
+        SecuritySchemes = new Dictionary<string, SecurityScheme> { { security.Key, security.Value } },
+    });
+
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -52,29 +84,14 @@ app.UseAuthentication(); // Add this before UseAuthorization
 app.UseAuthorization();
 
 
-// Protect all A2A endpoints under /a2a/*
-var a2aGroup = app.MapGroup("/a2a")
-    .RequireAuthorization("A2A");
+// Map A2A endpoints using DI-registered services
+var a2aGroup = app.MapGroup("/a2a");
 
-// Map A2A endpoints to the protected group instead of the main app
-var a2aTaskManager = a2aGroup.MapA2A(
-    agent,
-    path: "/",  // Empty path since we're already in the /a2a group
-    agentCard: new A2A.AgentCard
-    {
-        Name = "NewsAgent",
-        Description = "Gets the current worldwide news",
-        Version = "1.0.0",
-        Provider = new A2A.AgentProvider { Organization = "Vikas Sharma", Url = "https://github.com/vikas0sharma" },
-        Skills = [ new A2A.AgentSkill {
-             Id = "get_top_headlines",
-             Name = "get_top_headlines",
-             Description = "Gets live top and breaking headlines for a country, specific category in a country"
-         } ],
-        Url = $"{app.Configuration["A2AUrl"]}a2a",
-        SecuritySchemes = new Dictionary<string, A2A.SecurityScheme> { { security.Key, security.Value } }
-    },
-    taskManager => app.MapWellKnownAgentCard(taskManager, "/"));
+a2aGroup.MapA2A("/").RequireAuthorization("A2A");
+
+// Map well-known agent card at root for spec-compliant discovery
+var agentCard = app.Services.GetRequiredService<AgentCard>();
+app.MapWellKnownAgentCard(agentCard);
 
 app.MapControllers();
 
